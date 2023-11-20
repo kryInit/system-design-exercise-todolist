@@ -1,8 +1,20 @@
 {{ template "header" . }}
+
 <h1>TODO List</h1>
+{{ if .userName }}
+<p>ログインユーザ: {{ .userName }} &nbsp;&nbsp; / &nbsp;&nbsp; <a href="/logout">ログアウト</a></p>
+{{ else }}
+<p> 未ログインです </p>
+{{ end }}
+
 <ul>
+    {{ if .userName }}
     <li><a href="/list">登録済みタスク一覧</a></li>
+    <li><a href="/user/edit">ユーザ情報編集</a></li>
+    <li><a href="/user/delete-confirmation">ユーザ削除</a></li>
+    {{ else }}
+    <li><a href="/login">ログイン</a></li>
     <li><a href="/user/new">ユーザー登録</a></li>
-    <li><a href="/logout">ログアウト</a></li>
+    {{ end }}
 </ul>
 {{ template "footer" }}

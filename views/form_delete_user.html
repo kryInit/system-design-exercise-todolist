@@ -1,0 +1,10 @@
+{{ template "header" . }}
+
+<p>ログインユーザ: {{ .userName }} &nbsp;&nbsp; / &nbsp;&nbsp; <a href="/logout">ログアウト</a></p>
+
+<h1>ユーザデータの削除</h1>
+<p>本当に削除しますか？</p>
+<a href="/user/delete"><button type="button">はい</button></a>
+<a href="/"><button type="button">いいえ</button></a>
+
+{{ template "footer" }}

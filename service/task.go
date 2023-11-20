@@ -21,6 +21,13 @@ func TaskList(ctx *gin.Context) {
 		return
 	}
 
+	var user database.User
+	err = db.Get(&user, "SELECT id, name, password FROM users WHERE deleted = 0 AND id = ?", userID)
+	if err != nil {
+		Error(http.StatusInternalServerError, err.Error())(ctx)
+		return
+	}
+
 	// Get query parameter
 	kw := ctx.Query("kw")
 
@@ -39,11 +46,13 @@ func TaskList(ctx *gin.Context) {
 	}
 
 	// Render tasks
-	ctx.HTML(http.StatusOK, "task_list.html", gin.H{"Title": "Task list", "Tasks": tasks, "Kw": kw})
+	ctx.HTML(http.StatusOK, "task_list.html", gin.H{"Title": "Task list", "Tasks": tasks, "Kw": kw, "userName": user.Name})
 }
 
 // ShowTask renders a task with given ID
 func ShowTask(ctx *gin.Context) {
+	userID := sessions.Default(ctx).Get("user")
+
 	// Get DB connection
 	db, err := database.GetConnection()
 	if err != nil {
@@ -60,9 +69,9 @@ func ShowTask(ctx *gin.Context) {
 
 	// Get a task with given ID
 	var task database.Task
-	err = db.Get(&task, "SELECT * FROM tasks WHERE id=?", id) // Use DB#Get for one entry
+	err = db.Get(&task, "SELECT id, title, created_at, is_done FROM tasks INNER JOIN ownership ON task_id = id WHERE id=? AND user_id = ?", id, userID)
 	if err != nil {
-		Error(http.StatusBadRequest, err.Error())(ctx)
+		Error(http.StatusInternalServerError, err.Error())(ctx)
 		return
 	}
 
@@ -115,6 +124,8 @@ func RegisterTask(ctx *gin.Context) {
 }
 
 func EditTaskForm(ctx *gin.Context) {
+	userID := sessions.Default(ctx).Get("user")
+
 	// ID の取得
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
@@ -129,7 +140,7 @@ func EditTaskForm(ctx *gin.Context) {
 	}
 	// Get target task
 	var task database.Task
-	err = db.Get(&task, "SELECT * FROM tasks WHERE id=?", id)
+	err = db.Get(&task, "SELECT id, title, created_at, is_done FROM tasks INNER JOIN ownership ON task_id = id WHERE id=? AND user_id = ?", id, userID)
 	if err != nil {
 		Error(http.StatusBadRequest, err.Error())(ctx)
 		return
@@ -140,6 +151,8 @@ func EditTaskForm(ctx *gin.Context) {
 }
 
 func UpdateTask(ctx *gin.Context) {
+	userID := sessions.Default(ctx).Get("user")
+
 	// Get task ID from the URL
 	id := ctx.Param("id")
 
@@ -164,6 +177,13 @@ func UpdateTask(ctx *gin.Context) {
 	db, err := database.GetConnection()
 	if err != nil {
 		Error(http.StatusInternalServerError, err.Error())(ctx)
+		return
+	}
+
+	var task database.Task
+	err = db.Get(&task, "SELECT id, title, created_at, is_done FROM tasks INNER JOIN ownership ON task_id = id WHERE id=? AND user_id = ?", id, userID)
+	if err != nil {
+		Error(http.StatusBadRequest, err.Error())(ctx)
 		return
 	}
 

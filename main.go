@@ -54,6 +54,12 @@ func main() {
 	}
 	engine.GET("/user/new", service.NewUserForm)
 	engine.POST("/user/new", service.RegisterUser)
+
+	engine.GET("/user/edit", service.LoginCheck, service.EditUserDataForm)
+	engine.POST("/user/edit", service.LoginCheck, service.UpdateUserData)
+	engine.GET("/user/delete-confirmation", service.LoginCheck, service.DeleteUserForm)
+	engine.GET("/user/delete", service.LoginCheck, service.DeleteUser)
+
 	engine.GET("/login", service.LoginForm)
 	engine.POST("/login", service.Login)
 	engine.GET("/logout", service.Logout)

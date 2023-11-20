@@ -2,14 +2,28 @@ package service
 
 import (
 	"fmt"
+	"github.com/gin-contrib/sessions"
 	"net/http"
+	database "todolist.go/db"
 
 	"github.com/gin-gonic/gin"
 )
 
 // Home renders index.html
 func Home(ctx *gin.Context) {
-	ctx.HTML(http.StatusOK, "index.html", gin.H{"Title": "HOME"})
+	// Get DB connection
+	db, err := database.GetConnection()
+	if err != nil {
+		Error(http.StatusInternalServerError, err.Error())(ctx)
+		return
+	}
+
+	userID := sessions.Default(ctx).Get("user")
+
+	var user database.User
+	err = db.Get(&user, "SELECT id, name, password FROM users WHERE id = ?", userID)
+
+	ctx.HTML(http.StatusOK, "index.html", gin.H{"Title": "HOME", "userName": user.Name})
 }
 
 // NotImplemented renders error.html with 501 Not Implemented

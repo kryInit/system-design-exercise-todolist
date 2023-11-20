@@ -1,0 +1,14 @@
+{{ template "header" . }}
+
+<p>ログインユーザ: {{ .userName }} &nbsp;&nbsp; / &nbsp;&nbsp; <a href="/logout">ログアウト</a></p>
+
+<h1>ユーザ情報更新</h1>
+{{ if .ErrorMessage }}
+<p><font color="#FF0000">{{ .ErrorMessage }}</font></p>
+{{ end }}
+<form action="/user/edit" method="POST">
+    <label>新ユーザ名: </label><input type="text" name="new_username" required><br>
+    <label>新パスワード: </label><input type="text" name="new_password" required><br>
+    <input type="submit" value="更新">
+</form>
+{{ template "footer" }}
